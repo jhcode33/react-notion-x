@@ -15,12 +15,14 @@ import { parsePageId } from './parse-page-id'
  *
  * @param rootPageId - Page ID to start from.
  * @param rootSpaceId - Space ID to scope traversal.
+ * @param rootDatabaseId - When you want a limited build inside the database.
  * @param getPage - Function used to fetch a single page.
  * @param opts - Optional config
  */
 export async function getAllPagesInSpace(
   rootPageId: string,
   rootSpaceId: string | undefined,
+  rootDatabaseId: string | undefined,
   getPage: (pageId: string) => Promise<ExtendedRecordMap>,
   {
     concurrency = 4,
@@ -91,6 +93,13 @@ export async function getAllPagesInSpace(
                 block.space_id !== rootSpaceId
               ) {
                 return false
+              }
+
+              // the databaseId only build pages in database
+              if(rootDatabaseId) {
+                if(page.block[pageId]?.value?.parent_id !== rootDatabaseId) {
+                  return false
+                }
               }
 
               return true
